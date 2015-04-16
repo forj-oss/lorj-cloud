@@ -1,0 +1,4 @@
+[gerrit]
+host=review.forj.forj.io
+port=29418
+project=forj-oss/lorj-cloud.git
