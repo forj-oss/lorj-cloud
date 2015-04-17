@@ -126,7 +126,11 @@ class OpenstackController
     while server.state != 'ACTIVE'
       sleep(5)
       server = compute_connect.servers.get(server.id)
-      return if server.state == 'ERROR'
+
+      if server.state == 'Error'
+        controller_error('Unable to assign a Public IP to a server '\
+                         "in error '%s'", server.name)
+      end
     end
 
     addresses = compute_connect.addresses.all

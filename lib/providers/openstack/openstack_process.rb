@@ -23,4 +23,9 @@ class OpenstackProcess
     list = query_single(sObjectType, query, tenant_name)
     return list[0] if list.length > 0
   end
+
+  def openstack_domain_required?(_data)
+    return true if config[:auth_uri].match(%r{/v3/})
+    false
+  end
 end

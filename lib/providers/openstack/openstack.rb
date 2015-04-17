@@ -37,11 +37,15 @@ class Openstack
   obj_needs :data, :account_id,  :mapping => :openstack_username
   obj_needs :data, :account_key, :mapping => :openstack_api_key,
                                  :decrypt => true
-  obj_needs :data, :auth_uri,    :mapping => :openstack_auth_uri
+  obj_needs :data, :auth_uri,    :mapping => :openstack_auth_url
   obj_needs :data, :tenant,      :mapping => :openstack_tenant
   obj_needs :data, ':excon_opts/:connect_timeout', :default_value => 30
   obj_needs :data, ':excon_opts/:read_timeout',    :default_value => 240
   obj_needs :data, ':excon_opts/:write_timeout',   :default_value => 240
+
+  obj_needs_optional # Data required if uri contains v3
+  obj_needs :data, :user_domain, :mapping => :openstack_user_domain
+  obj_needs :data, :prj_domain, :mapping => :openstack_project_domain
 
   define_obj :compute_connection
   # Defines Data used by compute.
@@ -53,6 +57,10 @@ class Openstack
   obj_needs :data, :tenant,      :mapping => :openstack_tenant
   obj_needs :data, :compute,     :mapping => :openstack_region
 
+  obj_needs_optional # Data required if uri contains v3
+  obj_needs :data, :user_domain, :mapping => :openstack_user_domain
+  obj_needs :data, :prj_domain, :mapping => :openstack_project_domain
+
   define_obj :network_connection
   obj_needs :data, :account_id,  :mapping => :openstack_username
   obj_needs :data, :account_key, :mapping => :openstack_api_key,
@@ -60,6 +68,10 @@ class Openstack
   obj_needs :data, :auth_uri,    :mapping => :openstack_auth_url
   obj_needs :data, :tenant,      :mapping => :openstack_tenant
   obj_needs :data, :network,     :mapping => :openstack_region
+
+  obj_needs_optional # Data required if uri contains v3
+  obj_needs :data, :user_domain, :mapping => :openstack_user_domain
+  obj_needs :data, :prj_domain, :mapping => :openstack_project_domain
 
   # Openstack tenants object
   define_obj(:tenants, :create_e => :openstack_get_tenant)
@@ -101,7 +113,10 @@ class Openstack
   def_attr_mapping :port_max, :port_range_max
   def_attr_mapping :addr_map, :remote_ip_prefix
   def_attr_mapping :sg_id,    :security_group_id
+end
 
+# Defines Meta Openstack object
+class Openstack
   define_data(:account_id,
               :account => true,
               :desc => 'Openstack Username',
@@ -119,7 +134,8 @@ class Openstack
                 "identity' under your horizon UI - Project/Compute then "\
                 'Access & security.',
               :desc => 'Openstack Authentication service URL. '\
-                'Ex: https://mycloud:5000/v2.0/tokens',
+                'Ex: https://mycloud:5000/v2.0/tokens, '\
+                'https://mycloud:5000/v3/auth/tokens, ...',
               :validate => %r{^http(s)?:\/\/.*\/tokens$}
              )
   define_data(:tenant,
@@ -128,6 +144,27 @@ class Openstack
                 ', on top left, close to the logo',
               :desc => 'Openstack Tenant Name',
               :validate => /^.+/
+             )
+
+  define_data(:user_domain,
+              :account => true,
+              :explanation => 'Openstack authentication (v3) requires your '\
+                'user domain.',
+              :desc => 'User domain name',
+              :validate => /^.+/,
+              :pre_step_function => :openstack_domain_required?,
+              :before => :account_id,
+              :after => :auth_uri
+             )
+
+  define_data(:prj_domain,
+              :account => true,
+              :desc => 'Tenant domain name',
+              :default_value => 'Default',
+              :validate => /^.+/,
+              :pre_step_function => :openstack_domain_required?,
+              :before => :tenant,
+              :after => :auth_uri
              )
 
   define_data(:compute,
@@ -145,7 +182,7 @@ class Openstack
               :list_values => {
                 :query_type => :controller_call,
                 :object => :services,
-                :query_call => :get_services,
+                :query_call => :list_services,
                 :query_params => { :list_services => [:Compute, :compute] },
                 :validate => :list_strict
               }
@@ -166,7 +203,7 @@ class Openstack
               :list_values => {
                 :query_type => :controller_call,
                 :object => :services,
-                :query_call => :get_services,
+                :query_call => :list_services,
                 :query_params => { :list_services => [:Networking, :network] },
                 :validate => :list_strict
               }
@@ -177,7 +214,7 @@ class Openstack
   attr_value_mapping :create, 'BUILD'
   attr_value_mapping :boot,   :boot
   attr_value_mapping :active, 'ACTIVE'
-  attr_value_mapping :error, 'ERROR'
+  attr_value_mapping :error,  'ERROR'
 
   def_attr_mapping :private_ip_address, :accessIPv4
   def_attr_mapping :public_ip_address, :accessIPv4
@@ -266,15 +303,7 @@ class OpenstackController
   def connect(sObjectType, hParams)
     case sObjectType
     when :services
-      # Fog use URI type for auth uri: URI.parse(:auth_uri)
-      # Convert openstack_auth_uri to type URI
-      hParams[:hdata][:openstack_auth_uri] =
-          URI.parse(hParams[:hdata][:openstack_auth_uri])
-      retrieve_result =
-          Fog::OpenStack.retrieve_tokens_v2(hParams[:hdata],
-                                            hParams[:excon_opts])
-      creds = format_retrieve_result(retrieve_result)
-      return creds
+      get_services(hParams)
     when :compute_connection
       Fog::Compute.new(
         hParams[:hdata].merge(:provider => :openstack)
@@ -333,7 +362,7 @@ end
 # Following class describe how FORJ should handle Openstack Cloud objects.
 class OpenstackController
   # This function requires to return an Array of values or nil.
-  def get_services(sObjectType, oParams)
+  def list_services(sObjectType, oParams)
     case sObjectType
     when :services
       # oParams[sObjectType] will provide the controller object.
@@ -367,22 +396,88 @@ class OpenstackController
       end
       return result
     else
-      controller_error "'%s' is not a valid object for 'get_services'",
+      controller_error "'%s' is not a valid object for 'list_services'",
                        sObjectType
     end
   end
 
-  def format_retrieve_result(retrieve_result)
-    {
-      :auth_token => retrieve_result['access']['token']['id'],
-      :expires => retrieve_result['access']['token']['expires'],
-      :service_catalog =>
-          get_service_catalog(retrieve_result['access']['serviceCatalog']),
-      :endpoint_url => nil,
-      :cdn_endpoint_url => nil
-    }
+  # function to return a well formatted data for list of services
+  def get_services(hParams)
+    # Fog use URI type for auth uri: URI.parse(:auth_uri)
+    # Convert openstack_auth_uri to type URI
+    openstack_auth_url = hParams[:hdata][:openstack_auth_url]
+    hParams[:hdata][:openstack_auth_uri] = URI.parse(openstack_auth_url)
+
+    case openstack_auth_url
+    when /v1(\.\d+)?/
+      version = :v1
+      body = Fog::OpenStack.retrieve_tokens_v1(hParams[:hdata],
+                                               hParams[:excon_opts])
+    when /v2(\.\d+)?/
+      version = :v2
+      body = Fog::OpenStack.retrieve_tokens_v2(hParams[:hdata],
+                                               hParams[:excon_opts])
+    when /v3(\.\d+)?/
+      version = :v3
+      body = Fog::OpenStack.retrieve_tokens_v3(hParams[:hdata],
+                                               hParams[:excon_opts])
+    else
+      version = :v2
+      body = Fog::OpenStack.retrieve_tokens_v2(hParams[:hdata],
+                                               hParams[:excon_opts])
+    end
+    build_result(version, body)
+  end
+  # Function to provide a wel formatted standard data, usable by openstack
+  # provider
+  #
+  # * *args*:
+  #   - version: :v1, :v2 or :v3. Based on openstack authentication version
+  #   - body: result of Internal Fog::OpenStack.retrieve_tokens_v?
+  # * *returns*:
+  #   - Hash: Requires at least:
+  #     - :service_catalog : Hash of services available.
+  #
+  def build_result(version, body)
+    case version
+    when :v1 # Not supported
+      { :service_catalog => {} }
+    when :v2 #
+      {
+        :auth_token => body['access']['token']['id'],
+        :expires => body['access']['token']['expires'],
+        :service_catalog =>
+            get_service_catalog(body['access']['serviceCatalog']),
+        :endpoint_url => nil,
+        :cdn_endpoint_url => nil
+      }
+    when :v3 # body is an Array: 0 is the body, and 1 is the header
+      {
+        :auth_token => body[1]['X-Subject-Token'],
+        :expires => body[0]['token']['expires'],
+        :service_catalog =>
+            get_service_catalog(body[0]['token']['catalog']),
+        :endpoint_url => nil,
+        :cdn_endpoint_url => nil
+      }
+    end
   end
 
+  # Build service catalog at the following format:
+  #
+  # :<type>:
+  #   'name': <name>
+  #   :<region> : <url>
+  #
+  # where:
+  # - type  : Can be :identity, :orchestration, :volume, ...
+  # - name  : Is the name of the service like 'swift', 'heat', 'cinder', ...
+  # - region: Is the region name. Can be any string like 'regionOne'
+  # - url   : is the exposed url of that service
+  #           like https://swift.company.com/v1/HOSP_...
+  #
+  # It supports V2/V3 service auth response.
+  #
   def get_service_catalog(body)
     fail 'Unable to parse service catalog.' unless body
     service_catalog = {}
@@ -392,19 +487,30 @@ class OpenstackController
       type = type.to_sym
       next if s['endpoints'].nil?
       service_catalog[type] = {}
+      # V2/V3 auth output
       service_catalog[type]['name'] = s['name']
-      service_catalog = parse_service_catalog_endpoint(s, type, service_catalog)
+      parse_service_catalog_endpoint(s, type, service_catalog)
     end
     service_catalog
   end
 
+  # function which read a list of endpoints of a service to extract the url
+  #
+  # v2: Get 'endpoints'[]/'publicURL'
+  # v3: Get 'endpoints'[]/'url' if 'endpoints'[]/'interface' == 'public'
   def parse_service_catalog_endpoint(s, type, service_catalog)
     s['endpoints'].each do |ep|
       next if ep['region'].nil?
-      next if ep['publicURL'].nil?
-      next if ep['publicURL'].empty?
+
+      if ep['interface'] == 'public' # V3 auth output
+        service_catalog[type][ep['region'].to_sym] = ep['url']
+        break
+      end
+
+      next if ep['publicURL'].nil? || ep['publicURL'].empty?
+      # V2 auth output
       service_catalog[type][ep['region'].to_sym] = ep['publicURL']
+      break
     end
-    service_catalog
   end
 end
