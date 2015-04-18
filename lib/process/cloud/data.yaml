@@ -1,0 +1,136 @@
+# (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+# Following declares generic FORJ data to handle Fog object (compute/network/dns/...)
+# It defines the account file structure. section/key=value
+# All data can be predefined by default value (config.yaml/defaults.yaml) except
+# those identified by :account_exclusive: true
+:setup:
+  :steps:
+    :provider_config:
+      :desc:    "Provider configuration:"
+    :cloud_config:
+      :desc:    "Cloud configuration:"
+      :add:
+        - :keypair_path
+        - :keypair_base
+:sections:
+  # This section define updatable data available from config.yaml. But will never be added in an account file.
+  # Used by forj set/get functions
+  :default:
+    :account_name:
+      :desc:              "Default account name used by forj cli"
+    :provider_name:
+      :desc:              "Default provider name while running forj setup. By default, hpcloud is selected."
+  # Defines account credentials data
+  :account:
+    :name:
+      :desc:              "Account Name"
+      :readonly:          true
+      :account_exclusive: true
+    :provider:
+      :desc:              "Cloud provider name."
+      :readonly:          true
+      :account_exclusive: true
+
+  # Defines services
+  :services:
+    :compute:
+      :desc:              "Service identification for compute"
+      :account_exclusive: true
+      :account:           true
+      :step:              :provider_config
+    :network:
+      :desc:              "Service identification for network"
+      :account_exclusive: true
+      :account:           true
+      :step:              :provider_config
+
+  # Defines ssh keys credentials
+  :credentials:
+    :keypair_path:
+      :desc:               "Contains the full path to the :keypair_base."
+      :ask_step:           :provider_config
+    :keypair_base:
+      :desc:               "Contains the key file base name without .pem/.pub."
+      :ask_step:           :provider_config
+    :keypair_name:
+      :desc:               "keypair name defined in your cloud to access your server."
+      :ask_step:           :provider_config
+    :auth_uri:
+      :desc:               "Generic service auth url"
+      :ask_step:           :provider_config
+      :account_exclusive:  true
+      :account:            true
+      :required:           true
+    :user_domain:
+      :ask_step:           :provider_config
+      :account_exclusive:  true
+      :account:            true
+      :required:           false
+    :account_id:
+      :desc:               "Generic Cloud Account name."
+      :ask_step:           :provider_config
+      :account_exclusive:  true
+      :account:            true
+      :required:           true
+    :account_key:
+      :desc:               "Generic cloud account key"
+      :ask_step:           :provider_config
+      :account_exclusive:  true
+      :account:            true
+      :required:           true
+      :encrypted:          true
+    :tenant:
+      :desc:               "Tenant Name (Project name)"
+      :ask_step:           :provider_config
+      :account_exclusive:  true
+      :account:            true
+      :required:           true
+    :prj_domain:
+      :ask_step:           :provider_config
+      :account_exclusive:  true
+      :account:            true
+      :required:           false
+
+  :server:
+    :network_name:
+      :ask_step:        :cloud_config
+      :desc:            "Network name to attach to each forge boxes. By default we use 'forj'. If it doesn't exist, it will be created."
+    :security_group:
+      :desc:            "Security group name to configure and attach to each forge boxes."
+      :ask_step:        :cloud_config
+    :box_name:
+      :desc:            "Box name"
+    :flavor_name:
+      :desc:            "Server Flavor name"
+      :ask_step:        :cloud_config
+      :account:         true
+      :list_values:
+         :query_type:   :query_call # Will execute a query on flavor, query_params is empty for all.
+         :object:       :flavor
+         :value:        :name
+         :validate:     :list_strict
+    :image_name:
+      :desc:            "Image name"
+      :ask_step:        :cloud_config
+      :account:         true
+      :list_values:
+         :query_type:   :query_call # Will execute a query on flavor, query_params is empty for all. No filter currently working.
+         :object:       :image
+         :value:        :name
+         :validate:     :list_strict
+    :ports:
+      :desc:            "List of security group rules (1 port or range of ports) to open to the external network."
+      :ask_step:        :cloud_config
