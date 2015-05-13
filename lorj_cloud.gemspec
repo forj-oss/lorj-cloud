@@ -8,6 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = LorjCloud::VERSION
   spec.authors       = ["Christophe Larsonneur"]
   spec.email         = ["clarsonneur@gmail.com"]
+  spec.date          = LorjCloud::DATE
 
   spec.summary       = %q{Lorj cloud process.}
   spec.description   = %q{simplify cloud management, thanks to predefined process to manage cloud obj and make it work. }
