@@ -28,10 +28,10 @@ load File.join(hpcloud_path, 'security_groups.rb')
 # Defines Meta HPCloud object
 class Hpcloud
   define_obj :services
-  obj_needs :data, :account_id,      :mapping => :hp_access_key
-  obj_needs :data, :account_key,     :mapping => :hp_secret_key
-  obj_needs :data, :auth_uri,        :mapping => :hp_auth_uri
-  obj_needs :data, :tenant,          :mapping => :hp_tenant_id
+  obj_needs :data, 'credentials#account_id',      :mapping => :hp_access_key
+  obj_needs :data, 'credentials#account_key',     :mapping => :hp_secret_key
+  obj_needs :data, 'credentials#auth_uri',        :mapping => :hp_auth_uri
+  obj_needs :data, 'credentials#tenant',          :mapping => :hp_tenant_id
   obj_needs :data, ':excon_opts/:connect_timeout', :default_value => 30
   obj_needs :data, ':excon_opts/:read_timeout',    :default_value => 240
   obj_needs :data, ':excon_opts/:write_timeout',   :default_value => 240
@@ -41,18 +41,18 @@ class Hpcloud
   define_obj :compute_connection
   # Defines Data used by compute.
 
-  obj_needs :data, :account_id,  :mapping => :hp_access_key
-  obj_needs :data, :account_key, :mapping => :hp_secret_key
-  obj_needs :data, :auth_uri,    :mapping => :hp_auth_uri
-  obj_needs :data, :tenant,      :mapping => :hp_tenant_id
-  obj_needs :data, :compute,     :mapping => :hp_avl_zone
+  obj_needs :data, 'credentials#account_id',  :mapping => :hp_access_key
+  obj_needs :data, 'credentials#account_key', :mapping => :hp_secret_key
+  obj_needs :data, 'credentials#auth_uri',    :mapping => :hp_auth_uri
+  obj_needs :data, 'credentials#tenant',      :mapping => :hp_tenant_id
+  obj_needs :data, 'services#compute',        :mapping => :hp_avl_zone
 
   define_obj :network_connection
-  obj_needs :data, :account_id,  :mapping => :hp_access_key
-  obj_needs :data, :account_key, :mapping => :hp_secret_key
-  obj_needs :data, :auth_uri,    :mapping => :hp_auth_uri
-  obj_needs :data, :tenant,      :mapping => :hp_tenant_id
-  obj_needs :data, :network,     :mapping => :hp_avl_zone
+  obj_needs :data, 'credentials#account_id',  :mapping => :hp_access_key
+  obj_needs :data, 'credentials#account_key', :mapping => :hp_secret_key
+  obj_needs :data, 'credentials#auth_uri',    :mapping => :hp_auth_uri
+  obj_needs :data, 'credentials#tenant',      :mapping => :hp_tenant_id
+  obj_needs :data, 'services#network',        :mapping => :hp_avl_zone
 
   # Forj predefine following query mapping, used by ForjProcess
   # id => id, name => name
@@ -117,20 +117,20 @@ class Hpcloud
   def_attr_mapping :public_ip, :ip
 
   # defines setup Cloud data (:account => true for setup)
-  define_data(:account_id,
+  define_data('credentials#account_id',
               :account => true,
               :desc => 'HPCloud Access Key (From horizon, user drop down, '\
                        'manage keys)',
               :validate => /^[A-Z0-9]*$/
              )
-  define_data(:account_key,
+  define_data('credentials#account_key',
               :account => true,
               :desc => 'HPCloud secret Key (From horizon, user drop down, '\
                        'manage keys)',
               :encrypted => false,
               :validate => /^.+/
              )
-  define_data(:auth_uri,
+  define_data('credentials#auth_uri',
               :account => true,
               :desc => 'HPCloud Authentication service URL (default is HP '\
                        'Public cloud)',
@@ -138,17 +138,16 @@ class Hpcloud
               :default_value => 'https://region-a.geo-1.identity.hpcloudsvc'\
                                 '.com:35357/v2.0/'
              )
-  define_data(:tenant,
+  define_data('credentials#tenant',
               :account => true,
               :desc => 'HPCloud Tenant ID (from horizon, identity, projecs,'\
                        ' Project ID)',
               :validate => /^[0-9]+$/
              )
 
-  define_data(:compute,
+  define_data('services#compute',
               :account => true,
               :desc => 'HPCloud Compute service zone (Ex: region-a.geo-1)',
-              :depends_on => [:account_id, :account_key, :auth_uri, :tenant],
               :list_values => {
                 :query_type => :controller_call,
                 :object => :services,
@@ -158,10 +157,9 @@ class Hpcloud
               }
              )
 
-  define_data(:network,
+  define_data('services#network',
               :account => true,
               :desc => 'HPCloud Network service zone (Ex: region-a.geo-1)',
-              :depends_on => [:account_id, :account_key, :auth_uri, :tenant],
               :list_values => {
                 :query_type => :controller_call,
                 :object => :services,
@@ -227,9 +225,10 @@ class HpcloudController # rubocop: disable Metrics/ClassLength
                               hParams[:user_data], hParams[:meta_data])
     when :image
       required?(hParams, :compute_connection)
-      required?(hParams, :image_name)
+      required?(hParams, 'server#image_name')
 
-      HPCompute.get_image(hParams[:compute_connection], hParams[:image_name])
+      HPCompute.get_image(hParams[:compute_connection],
+                          hParams['server#image_name'])
     when :network
       required?(hParams, :network_connection)
       required?(hParams, :network_name)
@@ -252,11 +251,12 @@ class HpcloudController # rubocop: disable Metrics/ClassLength
                                  hParams[:security_group], hParams[:sg_desc])
     when :keypairs
       required?(hParams, :compute_connection)
-      required?(hParams, :keypair_name)
+      required?(hParams, 'credentials#keypair_name')
       required?(hParams, :public_key)
 
       HPKeyPairs.create_keypair(hParams[:compute_connection],
-                                hParams[:keypair_name], hParams[:public_key])
+                                hParams['credentials#keypair_name'],
+                                hParams[:public_key])
     when :router
       required?(hParams, :network_connection)
       required?(hParams, :router_name)

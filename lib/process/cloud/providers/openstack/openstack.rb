@@ -21,11 +21,11 @@ require 'uri'
 
 hpcloud_path = File.expand_path(File.dirname(__FILE__))
 
-require File.join(hpcloud_path, 'openstack_query.rb')
-require File.join(hpcloud_path, 'openstack_get.rb')
-require File.join(hpcloud_path, 'openstack_delete.rb')
-require File.join(hpcloud_path, 'openstack_create.rb')
-require File.join(hpcloud_path, 'openstack_update.rb')
+load File.join(hpcloud_path, 'openstack_query.rb')
+load File.join(hpcloud_path, 'openstack_get.rb')
+load File.join(hpcloud_path, 'openstack_delete.rb')
+load File.join(hpcloud_path, 'openstack_create.rb')
+load File.join(hpcloud_path, 'openstack_update.rb')
 
 # Defines Meta Openstack object
 class Openstack
@@ -34,11 +34,11 @@ class Openstack
   define_obj :services
   # Define Data used by service
 
-  obj_needs :data, :account_id,  :mapping => :openstack_username
-  obj_needs :data, :account_key, :mapping => :openstack_api_key,
-                                 :decrypt => true
-  obj_needs :data, :auth_uri,    :mapping => :openstack_auth_url
-  obj_needs :data, :tenant,      :mapping => :openstack_tenant
+  obj_needs :data, 'credentials#account_id',  :mapping => :openstack_username
+  obj_needs :data, 'credentials#account_key', :mapping => :openstack_api_key,
+                                              :decrypt => true
+  obj_needs :data, 'credentials#auth_uri',    :mapping => :openstack_auth_url
+  obj_needs :data, 'credentials#tenant',      :mapping => :openstack_tenant
   obj_needs :data, ':excon_opts/:connect_timeout', :default_value => 30
   obj_needs :data, ':excon_opts/:read_timeout',    :default_value => 240
   obj_needs :data, ':excon_opts/:write_timeout',   :default_value => 240
@@ -50,24 +50,24 @@ class Openstack
   define_obj :compute_connection
   # Defines Data used by compute.
 
-  obj_needs :data, :account_id,  :mapping => :openstack_username
-  obj_needs :data, :account_key, :mapping => :openstack_api_key,
-                                 :decrypt => true
-  obj_needs :data, :auth_uri,    :mapping => :openstack_auth_url
-  obj_needs :data, :tenant,      :mapping => :openstack_tenant
-  obj_needs :data, :compute,     :mapping => :openstack_region
+  obj_needs :data, 'credentials#account_id',  :mapping => :openstack_username
+  obj_needs :data, 'credentials#account_key', :mapping => :openstack_api_key,
+                                              :decrypt => true
+  obj_needs :data, 'credentials#auth_uri',    :mapping => :openstack_auth_url
+  obj_needs :data, 'credentials#tenant',      :mapping => :openstack_tenant
+  obj_needs :data, 'services#compute',     :mapping => :openstack_region
 
   obj_needs_optional # Data required if uri contains v3
   obj_needs :data, :user_domain, :mapping => :openstack_user_domain
   obj_needs :data, :prj_domain, :mapping => :openstack_project_domain
 
   define_obj :network_connection
-  obj_needs :data, :account_id,  :mapping => :openstack_username
-  obj_needs :data, :account_key, :mapping => :openstack_api_key,
-                                 :decrypt => true
-  obj_needs :data, :auth_uri,    :mapping => :openstack_auth_url
-  obj_needs :data, :tenant,      :mapping => :openstack_tenant
-  obj_needs :data, :network,     :mapping => :openstack_region
+  obj_needs :data, 'credentials#account_id',  :mapping => :openstack_username
+  obj_needs :data, 'credentials#account_key', :mapping => :openstack_api_key,
+                                              :decrypt => true
+  obj_needs :data, 'credentials#auth_uri',    :mapping => :openstack_auth_url
+  obj_needs :data, 'credentials#tenant',      :mapping => :openstack_tenant
+  obj_needs :data, 'services#network',     :mapping => :openstack_region
 
   obj_needs_optional # Data required if uri contains v3
   obj_needs :data, :user_domain, :mapping => :openstack_user_domain
@@ -76,7 +76,7 @@ class Openstack
   # Openstack tenants object
   define_obj(:tenants, :create_e => :openstack_get_tenant)
   obj_needs :CloudObject, :compute_connection
-  obj_needs :data, :tenant
+  obj_needs :data, 'credentials#tenant'
 
   # Openstack Network
   define_obj :network
@@ -117,18 +117,18 @@ end
 
 # Defines Meta Openstack object
 class Openstack
-  define_data(:account_id,
+  define_data('credentials#account_id',
               :account => true,
               :desc => 'Openstack Username',
               :validate => /^.+/
              )
 
-  define_data(:account_key,
+  define_data('credentials#account_key',
               :account => true,
               :desc => 'Openstack Password',
               :validate => /^.+/
              )
-  define_data(:auth_uri,
+  define_data('credentials#auth_uri',
               :account => true,
               :explanation => "The authentication service is identified as '"\
                 "identity' under your horizon UI - Project/Compute then "\
@@ -138,7 +138,7 @@ class Openstack
                 'https://mycloud:5000/v3/auth/tokens, ...',
               :validate => %r{^http(s)?:\/\/.*\/tokens$}
              )
-  define_data(:tenant,
+  define_data('credentials#tenant',
               :account => true,
               :explanation => 'The Project name is shown from your horizon UI'\
                 ', on top left, close to the logo',
@@ -153,8 +153,8 @@ class Openstack
               :desc => 'User domain name',
               :validate => /^.+/,
               :pre_step_function => :openstack_domain_required?,
-              :before => :account_id,
-              :after => :auth_uri
+              :before => 'credentials#account_id',
+              :after => 'credentials#auth_uri'
              )
 
   define_data(:prj_domain,
@@ -163,13 +163,13 @@ class Openstack
               :default_value => 'Default',
               :validate => /^.+/,
               :pre_step_function => :openstack_domain_required?,
-              :before => :tenant,
-              :after => :auth_uri
+              :before => 'credentials#tenant',
+              :after => 'credentials#auth_uri'
              )
 
-  define_data(:compute,
+  define_data('services#compute',
               :account => true,
-              :default_value => '<%= config[:network] %>',
+              :default_value => "<%= config['services#network'] %>",
               :explanation => 'Depending on your installation, you may need to'\
                 ' provide a Region name. This information is shown under your '\
                 'horizon UI - close right to the project name (top left).'\
@@ -178,7 +178,6 @@ class Openstack
                 'set as OS_REGION_NAME.'\
                 "\nIf there is no region shown, you can ignore it.",
               :desc => 'Openstack Compute Region (Ex: RegionOne)',
-              :depends_on => [:account_id, :account_key, :auth_uri, :tenant],
               :list_values => {
                 :query_type => :controller_call,
                 :object => :services,
@@ -188,9 +187,9 @@ class Openstack
               }
              )
 
-  define_data(:network,
+  define_data('services#network',
               :account => true,
-              :default_value => '<%= config[:compute] %>',
+              :default_value => "<%= config['services#compute'] %>",
               :desc => 'Openstack Network Region (Ex: RegionOne)',
               :explanation => 'Depending on your installation, you may need to'\
                 ' provide a Region name. This information is shown under your '\
@@ -199,7 +198,6 @@ class Openstack
                 'API, then download the Openstack RC file. The Region name is '\
                 'set as OS_REGION_NAME.'\
                 "\nIf there is no region shown, you can ignore it.",
-              :depends_on => [:account_id, :account_key, :auth_uri, :tenant],
               :list_values => {
                 :query_type => :controller_call,
                 :object => :services,
@@ -403,7 +401,7 @@ class OpenstackController
 
   # function to return a well formatted data for list of services
   def get_services(hParams)
-    # Fog use URI type for auth uri: URI.parse(:auth_uri)
+    # Fog use URI type for auth uri: URI.parse('credentials#auth_uri')
     # Convert openstack_auth_uri to type URI
     openstack_auth_url = hParams[:hdata][:openstack_auth_url]
     hParams[:hdata][:openstack_auth_uri] = URI.parse(openstack_auth_url)

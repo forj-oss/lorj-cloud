@@ -78,13 +78,13 @@ class OpenstackController
 
   def create_keypairs(hParams)
     required?(hParams, :compute_connection)
-    required?(hParams, :keypair_name)
+    required?(hParams, 'credentials#keypair_name')
     required?(hParams, :public_key)
 
     # API:
     # https://github.com/fog/fog/blob/master/lib/fog/openstack/docs/compute.md
     service = hParams[:compute_connection]
-    service.key_pairs.create(:name => hParams[:keypair_name],
+    service.key_pairs.create(:name => hParams['credentials#keypair_name'],
                              :public_key => hParams[:public_key])
   end
 

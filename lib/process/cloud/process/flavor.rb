@@ -24,7 +24,7 @@ class CloudProcess
   # Usually, flavor records already exists, and the controller may map them
   # CloudProcess predefines some values. Consult CloudProcess.rb for details
   def forj_get_or_create_flavor(sCloudObj, hParams)
-    flavor_name = hParams[:flavor_name]
+    flavor_name = hParams['server#flavor_name']
     PrcLib.state("Searching for flavor '%s'", flavor_name)
 
     flavors = query_flavor(sCloudObj, { :name => flavor_name }, hParams)
@@ -43,7 +43,7 @@ class CloudProcess
 
   # Should return 1 or 0 flavor.
   def query_flavor(sCloudObj, sQuery, hParams)
-    flavor_name = hParams[:flavor_name]
+    flavor_name = hParams['server#flavor_name']
     #  list = forj_query_flavor(sCloudObj, sQuery, hParams)
     #  query_single(sCloudObj, list, sQuery, flavor_name)
     query_single(sCloudObj, sQuery, flavor_name)
@@ -73,8 +73,8 @@ class Lorj::BaseDefinition # rubocop: disable ClassAndModuleChildren
             #         :delete_e   => :forj_delete_flavor
             )
 
-  obj_needs :CloudObject,  :compute_connection
-  obj_needs :data,         :flavor_name,         :for => [:create_e]
+  obj_needs :CloudObject, :compute_connection
+  obj_needs :data,        'server#flavor_name',         :for => [:create_e]
   # Cloud provider will need to map to one of those predefined flavors.
   # limitation values may match exactly or at least ensure those limitation
   # are under provider limitation

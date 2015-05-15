@@ -23,9 +23,9 @@
 class CloudProcess
   def connect(sCloudObj, hParams)
     ssl_error_obj = SSLErrorMgt.new # Retry object
-    PrcLib.debug("%s:%s Connecting to '%s' "\
-                 "- Project '%s'",
-                 self.class, sCloudObj, config[:provider], hParams[:tenant])
+    PrcLib.debug("%s:%s Connecting to '%s' - Project '%s'",
+                 self.class, sCloudObj, config[:provider],
+                 hParams['credentials#tenant'])
     begin
       controller_connect(sCloudObj)
    rescue => e
@@ -47,13 +47,12 @@ class Lorj::BaseDefinition
   # object to get list of services
   # Defines Process handler to call
   define_obj(:services,
-
              :create_e => :connect
             )
-  obj_needs :data, :auth_uri
-  obj_needs :data, :account_id
-  obj_needs :data, :account_key
-  obj_needs :data, :tenant
+  obj_needs :data, 'credentials#auth_uri'
+  obj_needs :data, 'credentials#account_id'
+  obj_needs :data, 'credentials#account_key'
+  obj_needs :data, 'credentials#tenant'
 
   undefine_attribute :id    # Do not return any predefined ID
   undefine_attribute :name  # Do not return any predefined NAME
@@ -62,14 +61,13 @@ end
 # compute_connection
 class Lorj::BaseDefinition
   define_obj(:compute_connection,
-
              :create_e => :connect # Will call ForjProcess connect
             )
-  obj_needs :data, :account_id
-  obj_needs :data, :account_key
-  obj_needs :data, :auth_uri
-  obj_needs :data, :tenant
-  obj_needs :data, :compute
+  obj_needs :data, 'credentials#account_id'
+  obj_needs :data, 'credentials#account_key'
+  obj_needs :data, 'credentials#auth_uri'
+  obj_needs :data, 'credentials#tenant'
+  obj_needs :data, 'services#compute'
 
   undefine_attribute :id    # Do not return any predefined ID
   undefine_attribute :name  # Do not return any predefined NAME
@@ -78,14 +76,13 @@ end
 # network_connection
 class Lorj::BaseDefinition
   define_obj(:network_connection,
-
              :create_e => :connect
             )
-  obj_needs :data, :account_id
-  obj_needs :data, :account_key
-  obj_needs :data, :auth_uri
-  obj_needs :data, :tenant
-  obj_needs :data, :network
+  obj_needs :data, 'credentials#account_id'
+  obj_needs :data, 'credentials#account_key'
+  obj_needs :data, 'credentials#auth_uri'
+  obj_needs :data, 'credentials#tenant'
+  obj_needs :data, 'services#network'
 
   undefine_attribute :id    # Do not return any predefined ID
   undefine_attribute :name  # Do not return any predefined NAME

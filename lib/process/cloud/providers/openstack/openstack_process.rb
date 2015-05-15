@@ -17,7 +17,7 @@
 # Specific openstack process added to the application process.
 class OpenstackProcess
   def openstack_get_tenant(sObjectType, hParams)
-    tenant_name = hParams[:tenant]
+    tenant_name = hParams['credentials#tenant']
     query = { :name => tenant_name }
     PrcLib.state("searching for tenant '%s'", tenant_name)
     list = query_single(sObjectType, query, tenant_name)

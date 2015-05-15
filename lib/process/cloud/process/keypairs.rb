@@ -39,7 +39,7 @@ class CloudProcess
   #                        also set - Used to import it)
   #
   def forj_get_or_create_keypair(sCloudObj, hParams)
-    keypair_name = hParams[:keypair_name]
+    keypair_name = hParams['credentials#keypair_name']
     PrcLib.state("Searching for keypair '%s'", keypair_name)
 
     keypair = forj_get_keypair(sCloudObj, keypair_name, hParams)
@@ -102,7 +102,7 @@ class Lorj::BaseDefinition
             )
 
   obj_needs :CloudObject,  :compute_connection
-  obj_needs :data,         :keypair_name,        :for => [:create_e]
+  obj_needs :data,         'credentials#keypair_name', :for => [:create_e]
   obj_needs :data,         :keypair_path
   obj_needs :data,         :keypair_base
 
@@ -174,9 +174,11 @@ class CloudProcess
 
   def keypair_import(hParams, loc_kpair)
     PrcLib.fatal(1, "Unable to import keypair '%s'. "\
-                    'Public key file is not found. '\
+                    "Public key file '%s' is not found. "\
                     "Please run 'forj setup %s'",
-                 hParams[:keypair_name],
+                 hParams['credentials#keypair_name'],
+                 File.join(loc_kpair[:keypair_path],
+                           loc_kpair[:public_key_name]),
                  config[:account_name]) unless loc_kpair[:public_key_exist?]
     public_key_file = File.join(loc_kpair[:keypair_path],
                                 loc_kpair[:public_key_name])
@@ -185,7 +187,7 @@ class CloudProcess
       public_key = File.read(public_key_file)
     rescue => e
       PrcLib.fatal(1, "Unable to import keypair '%s'. '%s' is "\
-                      "unreadable.\n%s", hParams[:keypair_name],
+                      "unreadable.\n%s", hParams['credentials#keypair_name'],
                    loc_kpair[:public_key_file],
                    e.message)
     end
@@ -200,7 +202,7 @@ class CloudProcess
   end
 
   def create_keypair(sCloudObj, hParams)
-    key_name = hParams[:keypair_name]
+    key_name = hParams['credentials#keypair_name']
     PrcLib.state("Importing keypair '%s'", key_name)
     ssl_error_obj = SSLErrorMgt.new
     begin
@@ -274,7 +276,7 @@ class CloudProcess
   end
 
   def get_keypairs_path(hParams, hKeys)
-    keypair_name = hParams[:keypair_name]
+    keypair_name = hParams['credentials#keypair_name']
 
     if hKeys[:private_key_exist?]
       hParams[:private_key_file] = File.join(hKeys[:keypair_path],

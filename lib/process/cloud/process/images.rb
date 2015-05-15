@@ -21,7 +21,7 @@
 # ---------------------------------------------------------------------------
 class CloudProcess
   def forj_get_or_create_image(sCloudObj, hParams)
-    image_name = hParams[:image_name]
+    image_name = hParams['server#image_name']
     PrcLib.state("Searching for image '%s'", image_name)
 
     search_the_image(sCloudObj, { :name => image_name }, hParams)
@@ -29,7 +29,7 @@ class CloudProcess
   end
 
   def search_the_image(sCloudObj, sQuery, hParams)
-    image_name = hParams[:image_name]
+    image_name = hParams['server#image_name']
     images = forj_query_image(sCloudObj, sQuery, hParams)
     case images.length
     when 0
@@ -95,5 +95,5 @@ class Lorj::BaseDefinition # rubocop: disable Style/ClassAndModuleChildren
             )
 
   obj_needs :CloudObject,  :compute_connection
-  obj_needs :data,         :image_name,          :for => [:create_e]
+  obj_needs :data,         'server#image_name',          :for => [:create_e]
 end
