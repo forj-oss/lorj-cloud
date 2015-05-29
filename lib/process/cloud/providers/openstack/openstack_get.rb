@@ -32,6 +32,8 @@ class OpenstackController
 
   def_get :compute_connection, :keypairs, :key_pairs
 
+  def_get :compute_connection, :public_ip, :addresses
+
   def get_server_log(hParams, sUniqId)
     required?(hParams, :server)
     hParams[:server].console(sUniqId)

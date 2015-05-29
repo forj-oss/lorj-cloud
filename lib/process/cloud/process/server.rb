@@ -48,7 +48,7 @@ class CloudProcess
   def forj_query_server(sCloudObj, sQuery, _hParams)
     ssl_error_obj = SSLErrorMgt.new
     begin
-      controller_query(sCloudObj, sQuery)
+      query_single(sCloudObj, sQuery, config[:search_for])
     rescue => e
       retry unless ssl_error_obj.error_detected(e.message, e.backtrace, e)
     end
@@ -94,7 +94,11 @@ class Lorj::BaseDefinition
   predefine_data_value :active,   :desc => 'Server is started.'
   predefine_data_value :error,    :desc => 'Server is in error.'
   predefine_data_value :shutdown, :desc => 'Server is down.'
-  def_attribute :private_ip_address
+  # The private addresses attribute should be composed by
+  # network_name:
+  # - IP addresses
+  # The controller must return at least those structured data.
+  def_attribute :private_ip_addresses
   def_attribute :public_ip_address
 
   def_attribute :image_id

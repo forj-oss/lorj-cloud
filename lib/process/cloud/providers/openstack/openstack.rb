@@ -215,8 +215,12 @@ class Openstack
   attr_value_mapping :error,    'ERROR'
   attr_value_mapping :shutdown, 'SHUTOFF'
 
-  def_attr_mapping :private_ip_address, :accessIPv4
-  def_attr_mapping :public_ip_address, :accessIPv4
+  def_attr_mapping :private_ip_addresses,
+                   [:addresses, '{/.*/}',
+                    '<%= data["OS-EXT-IPS:type"] == "fixed" %>|addr']
+  def_attr_mapping :public_ip_address,
+                   [:addresses, '{/.*/}',
+                    '<%= data["OS-EXT-IPS:type"] == "floating" %>|addr']
   def_attr_mapping :image_id, [:image, 'id']
 
   define_obj :router

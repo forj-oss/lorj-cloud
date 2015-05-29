@@ -67,6 +67,11 @@ module HPCompute
     result
   end
 
+  def self.get_server_assigned_address(oComputeConnect, id)
+    addresses = oComputeConnect.addresses.all
+    addresses.each { |oElem| return oElem if oElem.attributes['id'] == id }
+  end
+
   def self.server_assign_address(oComputeConnect, server)
     while server.state != 'ACTIVE'
       sleep(5)

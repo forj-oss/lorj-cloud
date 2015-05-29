@@ -99,6 +99,7 @@ class Hpcloud
 
   # ************************************ SERVER Object
   define_obj :server
+  def_attr_mapping :private_ip_addresses, [:addresses, '{key}', [:addr]]
   def_attr_mapping :status, :state
   attr_value_mapping :create,   'BUILD'
   attr_value_mapping :boot,     :boot
@@ -343,7 +344,7 @@ class HpcloudController # rubocop: disable Metrics/ClassLength
                               hParams[:server])
     end
   end
-
+  # rubocop: disable CyclomaticComplexity,
   def get(sObjectType, sUniqId, hParams)
     case sObjectType
     when :server_log
@@ -362,10 +363,16 @@ class HpcloudController # rubocop: disable Metrics/ClassLength
     when :keypairs
       required?(hParams, :compute_connection)
       HPKeyPairs.get_keypair(hParams[:compute_connection], sUniqId)
+    when :public_ip
+      required?(hParams, :compute_connection)
+      required?(hParams, :server)
+      HPCompute.get_server_assigned_address(hParams[:compute_connection],
+                                            sUniqId)
     else
       forjError "'%s' is not a valid object for 'get'", sObjectType
     end
   end
+  # rubocop: enable CyclomaticComplexity
 
   def query_each(oFogObject)
     case oFogObject.class.to_s
