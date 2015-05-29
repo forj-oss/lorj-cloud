@@ -93,6 +93,7 @@ class Lorj::BaseDefinition
   predefine_data_value :boot,     :desc => 'Server is booting.'
   predefine_data_value :active,   :desc => 'Server is started.'
   predefine_data_value :error,    :desc => 'Server is in error.'
+  predefine_data_value :shutdown, :desc => 'Server is down.'
   def_attribute :private_ip_address
   def_attribute :public_ip_address
 

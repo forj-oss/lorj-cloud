@@ -209,10 +209,11 @@ class Openstack
 
   define_obj :server
   def_attr_mapping :status, :state
-  attr_value_mapping :create, 'BUILD'
-  attr_value_mapping :boot,   :boot
-  attr_value_mapping :active, 'ACTIVE'
-  attr_value_mapping :error,  'ERROR'
+  attr_value_mapping :create,   'BUILD'
+  attr_value_mapping :boot,     :boot
+  attr_value_mapping :active,   'ACTIVE'
+  attr_value_mapping :error,    'ERROR'
+  attr_value_mapping :shutdown, 'SHUTOFF'
 
   def_attr_mapping :private_ip_address, :accessIPv4
   def_attr_mapping :public_ip_address, :accessIPv4
