@@ -40,6 +40,7 @@ class CloudProcess
   #
   def forj_get_or_create_keypair(sCloudObj, hParams)
     keypair_name = hParams['credentials#keypair_name']
+
     PrcLib.state("Searching for keypair '%s'", keypair_name)
 
     keypair = forj_get_keypair(sCloudObj, keypair_name, hParams)
@@ -50,7 +51,11 @@ class CloudProcess
                                  hParams[:keypair_base])
       keypair = keypair_import(hParams, loc_kpair)
     else
-      keypair_display(keypair)
+      if keypair.empty?
+        PrcLib.warning("keypair '%s' was not found.", keypair_name)
+      else
+        keypair_display(keypair)
+      end
     end
     keypair
   end
@@ -126,7 +131,7 @@ class CloudProcess
   def keypair_display(keypair)
     PrcLib.info("Found keypair '%s'.", keypair[:name])
 
-    unless keypair.exist?[:keypair_path]
+    unless keypair.exist?(:keypair_path)
       PrcLib.info('Unable to verify your keypair with your local files.'\
                   ' :keypair_path is missing.')
       return
