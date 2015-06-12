@@ -43,7 +43,9 @@ class CloudProcess
     PrcLib.state("Searching for keypair '%s'", keypair_name)
 
     keypair = forj_get_keypair(sCloudObj, keypair_name, hParams)
-    if keypair.empty?
+    if keypair.empty? &&
+       hParams.exist?(:keypair_path) && hParams.exist?(:keypair_base)
+
       loc_kpair = keypair_detect(keypair_name, hParams[:keypair_path],
                                  hParams[:keypair_base])
       keypair = keypair_import(hParams, loc_kpair)
@@ -56,16 +58,18 @@ class CloudProcess
   # Query cloud keypairs and check coherence with local files
   # of same name in forj files located by :keypair_path
   def forj_query_keypairs(sCloudObj, sQuery, hParams)
-    keypair_path = File.expand_path(hParams[:keypair_path])
-    keypair_base = File.expand_path(hParams[:keypair_base])
-
     ssl_error_obj = SSLErrorMgt.new
     begin
       keypairs = controller_query(sCloudObj, sQuery)
     rescue => e
       retry unless ssl_error_obj.error_detected(e.message, e.backtrace, e)
     end
+    return keypairs unless hParams.exist?(:keypair_path) &&
+                           hParams.exist?(:keypair_base)
     # Looping on keypairs to identify if they have a valid local ssh key.
+    keypair_path = File.expand_path(hParams[:keypair_path])
+    keypair_base = File.expand_path(hParams[:keypair_base])
+
     keypairs.each do |keypair|
       loc_kpair = keypair_detect(keypair_name, keypair_path, keypair_base)
       keypair_files_detected(keypair, loc_kpair)
@@ -83,6 +87,7 @@ class CloudProcess
       retry unless ssl_error_obj.error_detected(e.message, e.backtrace, e)
     end
 
+    return keypair unless hParams.exist?(:keypair_path)
     keypair_path = File.expand_path(hParams[:keypair_path])
     loc_kpair = keypair_detect(keypair_name, keypair_path, keypair_name)
     keypair_files_detected(keypair, loc_kpair) unless keypair.empty?
@@ -103,11 +108,12 @@ class Lorj::BaseDefinition
 
   obj_needs :CloudObject,  :compute_connection
   obj_needs :data,         'credentials#keypair_name', :for => [:create_e]
+
+  obj_needs_optional
+  # By default optional. But required by the ssh case if needed.
   obj_needs :data,         :keypair_path
   obj_needs :data,         :keypair_base
-
   # By default optional. But required by the import case if needed.
-  obj_needs_optional
   obj_needs :data,         :public_key,          :for => [:create_e]
 
   def_attribute :public_key
@@ -120,6 +126,11 @@ class CloudProcess
   def keypair_display(keypair)
     PrcLib.info("Found keypair '%s'.", keypair[:name])
 
+    unless keypair.exist?[:keypair_path]
+      PrcLib.info('Unable to verify your keypair with your local files.'\
+                  ' :keypair_path is missing.')
+      return
+    end
     private_key_file = File.join(keypair[:keypair_path],
                                  keypair[:private_key_name])
     public_key_file = File.join(keypair[:keypair_path],
