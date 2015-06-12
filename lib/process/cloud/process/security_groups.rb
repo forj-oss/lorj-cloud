@@ -31,8 +31,21 @@ class CloudProcess
     register(security_group)
 
     PrcLib.info('Configuring Security Group \'%s\'', sg_name)
-    ports = config.get(:ports)
+    if hParams.exist?('server#ports')
+      ports = hParams['server#ports']
+    else # case kept for compatibility.
+      ports = config[:ports]
+    end
 
+    return security_group unless ports.is_a?(Array)
+
+    forj_sg_update_ports(ports)
+
+    security_group
+  end
+
+  # forj get or create port on SG
+  def forj_sg_update_ports(ports)
     ports.each do |port|
       port = port.to_s if port.class != String
       if !(/^\d+(-\d+)?$/ =~ port)
@@ -55,7 +68,6 @@ class CloudProcess
         process_create(:rule, params)
       end
     end
-    security_group
   end
 
   # Process Delete handler
@@ -80,8 +92,7 @@ class CloudProcess
     end
     case sgroups.length
     when 0
-      PrcLib.info("No security group '%s' found",
-                  hParams[:security_group])
+      PrcLib.info("No security group '%s' found", hParams[:security_group])
       nil
     when 1
       PrcLib.info("Found security group '%s'", sgroups[0, :name])
@@ -102,6 +113,7 @@ class Lorj::BaseDefinition
   obj_needs :CloudObject,  :network_connection
   obj_needs :data,         :security_group,      :for => [:create_e]
   obj_needs_optional
+  obj_needs :data,         'server#ports',       :for => [:create_e]
   obj_needs :data,         :sg_desc,             :for => [:create_e]
 end
 
