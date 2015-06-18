@@ -222,6 +222,7 @@ class Openstack
                    [:addresses, '{/.*/}',
                     '<%= data["OS-EXT-IPS:type"] == "floating" %>|addr']
   def_attr_mapping :image_id, [:image, 'id']
+  def_attr_mapping :meta_data, :metadata
 
   define_obj :router
   obj_needs_optional
@@ -355,7 +356,21 @@ class OpenstackController
     controller_error "==>Unable to map '%s'. %s", key, e.message
   end
 
+  def _server_metadata_get(oControlerObject)
+    ret = {}
+    oControlerObject.metadata.each do |m|
+      k = m.attributes[:key]
+      v = m.attributes[:value]
+      ret[k] = v
+    end
+    ret
+  end
+
   def _get_instance_attr(oControlerObject, key)
+    if key[0] == :metadata &&
+       oControlerObject.class == Fog::Compute::OpenStack::Server
+      return _server_metadata_get(oControlerObject)
+    end
     return nil if oControlerObject.send(key[0]).nil?
     return oControlerObject.send(key[0]) if key.length == 1
     oControlerObject.send(key[0]).rh_get(key[1..-1])

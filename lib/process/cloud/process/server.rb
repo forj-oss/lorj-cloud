@@ -103,6 +103,7 @@ class Lorj::BaseDefinition
 
   def_attribute :image_id
   def_attribute :key_name
+  def_attribute :meta_data
 end
 
 # Internal Process function

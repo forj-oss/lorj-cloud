@@ -100,6 +100,7 @@ class Hpcloud
   # ************************************ SERVER Object
   define_obj :server
   def_attr_mapping :private_ip_addresses, [:addresses, '{key}', [:addr]]
+  def_attr_mapping :meta_data, :metadata
   def_attr_mapping :status, :state
   attr_value_mapping :create,   'BUILD'
   attr_value_mapping :boot,     :boot
@@ -394,10 +395,28 @@ class HpcloudController # rubocop: disable Metrics/ClassLength
                        "Valid one are : '%s'",
                        key[0], oControlerObject.class,
                        def_attributes unless def_attributes.include?(key[0])
-      attributes.rh_get(key)
+      return attributes.rh_get(key) if attributes.rh_exist?(key)
+      _get_instance_attr(oControlerObject, key)
     end
   rescue => e
     controller_error "Unable to map '%s'. %s", key, e.message
+  end
+
+  def _server_metadata_get(oControlerObject)
+    ret = {}
+    oControlerObject.metadata.each do |m|
+      k = m.attributes[:key]
+      v = m.attributes[:value]
+      ret[k] = v
+    end
+    ret
+  end
+
+  def _get_instance_attr(oControlerObject, key)
+    return _server_metadata_get(oControlerObject) if key[0] == :metadata
+    return nil if oControlerObject.send(key[0]).nil?
+    return oControlerObject.send(key[0]) if key.length == 1
+    oControlerObject.send(key[0]).rh_get(key[1..-1])
   end
 
   def set_attr(oControlerObject, key, value)
