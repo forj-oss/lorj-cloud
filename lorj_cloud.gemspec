@@ -19,15 +19,18 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-#  if spec.respond_to?(:metadata)
-#    spec.metadata['allowed_push_host'] = "TODO: Set to 'http://mygemserver.com' to prevent pushes to rubygems.org, or delete to allow pushes to any server."
-#  end
-
   spec.add_development_dependency "bundler", "~> 1.9"
   spec.add_development_dependency "rake", "~> 10.0"
-  
+  spec.add_development_dependency "rspec", "~> 3.1.0"
+
   spec.add_runtime_dependency "lorj", ">= 1.0.12"
   spec.add_runtime_dependency 'subhash', '>= 0.1.3'
   spec.add_runtime_dependency "fog", "~> 1.30.0"
-  spec.add_development_dependency "rspec", "~> 3.1.0"
+
+  # Ruby 1.8 restrictions - BEGIN - To be removed at next major release.
+  # NOTE that gemspec is used at build time. Do not use RUBY_VERSION check
+  # for runtime dependency. It will influence the content of the package.
+  spec.add_runtime_dependency "mime-types", '< 2.0'
+  spec.add_runtime_dependency "nokogiri", '< 1.6'
+  # Ruby 1.8 restrictions - END
 end
