@@ -26,6 +26,8 @@ class CloudProcess
   def forj_get_or_create_server(sCloudObj, hParams)
     server_name = hParams[:server_name]
     PrcLib.state("Searching for server '%s'", server_name)
+
+    config[:search_for] = server_name
     servers = forj_query_server(sCloudObj, { :name => server_name }, hParams)
     if servers.length > 0
       # Get server details

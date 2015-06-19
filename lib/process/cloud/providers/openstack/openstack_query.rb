@@ -16,81 +16,61 @@
 
 # Defined Openstack object query.
 class OpenstackController
-  def self.def_basic_query(connection, name, property_name = nil)
-    property_name = property_name.nil? ? name.to_s + 's' : property_name.to_s
-
-    define_method("query_#{name}") do |hParams, _query|
-      required?(hParams, connection)
-      hParams[connection].send(property_name).all
-    end
-  end
-
-  # Implementation of API supporting query Hash
-  def self.def_simple_query(connection, name, property_name = nil)
-    property_name = property_name.nil? ? name.to_s + 's' : property_name.to_s
-
-    define_method("query_#{name}") do |hParams, query|
-      required?(hParams, connection)
-      hParams[connection].send(property_name).all query
-    end
-  end
-
   # Implementation of API NOT supporting query Hash
   # The function will filter itself.
-  def self.def_complex_query(connection, name, property_name = nil)
+  # It must support
+  # - Regexp
+  # - simple value equality
+  def self.def_query(requires, name, property_name = nil)
     property_name = property_name.nil? ? name.to_s + 's' : property_name.to_s
 
     define_method("query_#{name}") do |hParams, query|
-      required?(hParams, connection)
+      requires = [requires] unless requires.is_a?(Array)
+      requires.each { |r| required?(hParams, r) }
 
-      key_pairs = hParams[connection].send(property_name).all
-      results = []
-      key_pairs.each do |sElem|
-        selected = true
-        attributes = sElem.instance_variable_get(:@attributes)
-        query.each do |key, value|
-          if attributes[key] != value
-            selected = false
-            break
-          end
-        end
-        results.push sElem if selected
+      connection = requires[0]
+
+      yield hParams, query if block_given?
+
+      func = hParams[connection].send(property_name).method(:all)
+      if func.parameters.length > 0
+        Lorj.debug(4, "'%s' uses Openstack API filter feature.", __method__)
+        objects = func.call ctrl_query_select(query, String)
+      else
+        objects = func.call
       end
-      results
+      # Uses :[] or :<key> to match object and query attr.
+      Lorj.debug(4, "'%s' gets %d records", __method__, objects.length)
+      ctrl_query_each objects, query # Return the select objects.
     end
   end
 
-  def_simple_query :compute_connection, :tenant
+  def_query :compute_connection, :tenant
 
-  def_simple_query :compute_connection, :image
+  def_query :compute_connection, :image
 
-  def_simple_query :compute_connection, :flavor
+  def_query :compute_connection, :flavor
 
-  def_simple_query :compute_connection, :server
+  def_query :compute_connection, :server
 
-  def_simple_query :network_connection, :network
+  def_query :network_connection, :network
 
-  def_simple_query :network_connection, :subnetwork, :subnets
+  def_query :network_connection, :subnetwork, :subnets
 
-  def_simple_query :network_connection, :router
+  def_query :network_connection, :router
 
-  def_simple_query :network_connection, :port
+  def_query :network_connection, :port
 
-  # def_simple_query :network_connection, :security_groups, :security_groups
-
-  def_simple_query :network_connection, :rule, :security_group_rules
-
-  def_complex_query :compute_connection, :keypairs, :key_pairs
-
-  def_complex_query :compute_connection, :public_ip, :addresses
-
-  def_complex_query :compute_connection, :tenants, :tenants
-
-  def query_security_groups(hParams, query)
-    required?(hParams, :network_connection)
-    required?(hParams, :tenants)
-
+  def_query([:network_connection, :tenants],
+            :security_groups, :security_groups) do |hParams, query|
     query[:tenant_id] = hParams[:tenants].id
-    hParams[:network_connection].send(:security_groups).all query
   end
+
+  def_query :network_connection, :rule, :security_group_rules
+
+  def_query :compute_connection, :keypairs, :key_pairs
+
+  def_query :compute_connection, :public_ip, :addresses
+
+  def_query :compute_connection, :tenants, :tenants
 end
