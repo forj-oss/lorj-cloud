@@ -17,21 +17,12 @@
 # HPcloud network class
 module HPNetwork
   # Network driver
-  def self.query_network(oNetworkConnect, sQuery)
-    oNetworkConnect.networks.all(sQuery)
-  end
-
   def self.create_network(oNetworkConnect, name)
     oNetworkConnect.networks.create(:name => name)
   end
 
   def self.delete_network(oNetworkConnect, oNetwork)
     oNetworkConnect.networks.get(oNetwork.id).destroy
-  end
-
-  # SubNetwork driver
-  def self.query_subnetwork(oNetworkConnect, sQuery)
-    oNetworkConnect.subnets.all(sQuery)
   end
 
   def self.create_subnetwork(oNetworkConnect, oNetwork, name)
@@ -90,9 +81,6 @@ module HPNetwork
   end
 
   # router driver
-  def self.query_router(oNetworkConnect, sQuery)
-    oNetworkConnect.routers.all(sQuery)
-  end
 
   def self.update_router(oRouters)
     oRouters.save
@@ -106,10 +94,5 @@ module HPNetwork
 
   def self.add_interface(oRouter, oSubNetwork)
     oRouter.add_interface(oSubNetwork.id, nil)
-  end
-
-  # Port driver
-  def self.query_port(oNetworkConnect, sQuery)
-    oNetworkConnect.ports.all(sQuery)
   end
 end

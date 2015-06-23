@@ -16,10 +16,6 @@
 
 # HPCloud security groups
 module HPSecurityGroups
-  def self.query_sg(oNetworkConnect, sQuery)
-    oNetworkConnect.security_groups.all(sQuery)
-  end
-
   def self.create_sg(oNetwork, name, description)
     params = { :name => name }
     params[:description] = description if description
@@ -30,10 +26,6 @@ module HPSecurityGroups
     oNetwork.security_group_rules.create(hData)
   end
 
-  def self.query_rule(oNetwork, sQuery)
-    oNetwork.security_group_rules.all(sQuery)
-  end
-
   def self.delete_rule(oNetwork, rule_id)
     oNetwork.security_group_rules.get(rule_id).destroy
   end
@@ -41,23 +33,6 @@ end
 
 # HPCloud keypairs
 module HPKeyPairs
-  def self.query_keypair(oComputeConnect, sQuery)
-    keypairs = oComputeConnect.key_pairs.all
-    results = []
-    keypairs.each do |sElem|
-      is_selected = true
-      attributes = sElem.instance_variable_get(:@attributes)
-      sQuery.each do |key, value|
-        if attributes[key] != value
-          is_selected = false
-          break
-        end
-      end
-      results.push sElem if is_selected
-    end
-    results
-  end
-
   def self.get_keypair(oComputeConnect, sId)
     oComputeConnect.key_pairs.get(sId)
   end
