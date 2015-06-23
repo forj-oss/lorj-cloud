@@ -243,6 +243,10 @@ class Openstack
   def_attribute :network_id
 
   define_obj :public_ip
+  # Used by floating_ip if needed
+  obj_needs :CloudObject,  :network_connection, :for => [:create_e]
+  obj_needs :CloudObject,  :external_network,   :for => [:create_e]
+
   def_attr_mapping :server_id, :instance_id
   def_attr_mapping :public_ip, :ip
 

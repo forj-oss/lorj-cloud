@@ -123,7 +123,8 @@ class OpenstackController
     compute_connect = hParams[:compute_connection]
     server = hParams[:server]
 
-    while server.state != 'ACTIVE'
+    Lorj.debug(3, "Waiting for server '%s' to become ready...", server.name)
+    until server.ready?
       sleep(5)
       server = compute_connect.servers.get(server.id)
 
@@ -133,37 +134,61 @@ class OpenstackController
       end
     end
 
-    addresses = compute_connect.addresses.all
+    # if 2 processes run in // to allocate a floating to different server
+    # openstack can re-allocate and the last who set the server win.
+    # So, we need to set it, and wait to see if the allocation is confirmed
+    # To the current server.
+    # This is required as there is no guarantee who did the last allocation
+    # of this IP.
+    # This should reduce strongly the risk but not completely.
+    # The best approach is that openstack MUST required to disassociate before
+    # associate...
+    # And if the second want to do the same, an error should be reported and
+    # a retry to be spawned.
     address = nil
-    # Search for an available IP
-    addresses.each do |elem|
-      if elem.fixed_ip.nil?
-        address = elem
-        break
-      end
-    end
+    loop do
+      address = addresses_all(hParams)
+      Lorj.debug(5, "Trying to associate '%s' to '%s'.",
+                 address.ip, server.name)
 
-    address = allocate_new_ip(compute_connect) if address.nil?
-    if address.nil?
-      controller_error("No Public IP to assign to server '%s'", server.name)
+      address.server = server # associate the server
+      sleep(1 + rand(3))
+      address.reload
+      break if address.instance_id == server.id
     end
-
-    address.server = server # associate the server
-    address.reload
-    # This function needs to returns a list of object.
-    # This list must support the each function.
+    Lorj.debug(4, "'%s' is confirmed to be associated to '%s'.",
+               address.ip, server.name)
     address
   end
+end
 
-  def allocate_new_ip(compute_connect)
-    # Create a new public IP to add in the pool.
-    pools = compute_connect.addresses.get_address_pools
-    controller_error('No IP Pool found') if pools.length == 0
-    # TODO: Be able to support choice of pool at setup time.
-    if pools.length > 1
-      Lorj.warning('Several pools found. Selecting the first one.')
+# Internal functions
+class OpenstackController # :nodoc:
+  def addresses_all(hParams)
+    addresses = hParams[:compute_connection].addresses.all
+    # Search for an available IP
+    loop do
+      addresses.each { |elem| return elem if elem.fixed_ip.nil? }
+      # If no IP are available, create a new one.
+      Lorj.debug(3, 'No more Free IP. Allocate a new one.')
+      create_floating_ip(hParams)
+      addresses.reload
     end
-    compute_connect.addresses.create 'pool' => pools[0]['name']
+  end
+
+  def create_floating_ip(params)
+    required?(params, :network_connection)
+    required?(params, :external_network)
+
+    network = params[:network_connection]
+    ext_net = params[:external_network]
+
+    # Create a new public IP to add in the pool.
+    begin
+      network.floating_ips.create(:floating_network_id => ext_net.id)
+    rescue => e
+      controller_error('Unable to get a new floating IP. %s', e)
+    end
   end
 
   def get_next_subnet(oNetworkConnect)

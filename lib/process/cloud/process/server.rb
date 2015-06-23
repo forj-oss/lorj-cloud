@@ -50,7 +50,8 @@ class CloudProcess
   def forj_query_server(sCloudObj, sQuery, _hParams)
     ssl_error_obj = SSLErrorMgt.new
     begin
-      query_single(sCloudObj, sQuery, config[:search_for])
+      controller_query(sCloudObj, sQuery)
+      #  query_single(sCloudObj, sQuery, config[:search_for])
     rescue => e
       retry unless ssl_error_obj.error_detected(e.message, e.backtrace, e)
     end
