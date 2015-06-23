@@ -33,4 +33,13 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "mime-types", '< 2.0'
   spec.add_runtime_dependency "nokogiri", '< 1.6'
   # Ruby 1.8 restrictions - END
+    if RUBY_VERSION.match(/1\.8/)
+    spec.add_development_dependency "ruby-debug"
+  elsif RUBY_VERSION.match(/1\.9/)
+    spec.add_development_dependency "debugger"
+    spec.add_development_dependency "rubocop", "~> 0.30.0"
+  else
+    spec.add_development_dependency "byebug"
+    spec.add_development_dependency "rubocop", "~> 0.30.0"
+  end
 end
