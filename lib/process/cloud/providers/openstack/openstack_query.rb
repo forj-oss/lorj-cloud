@@ -33,16 +33,34 @@ class OpenstackController
       yield hParams, query if block_given?
 
       func = hParams[connection].send(property_name).method(:all)
-      if func.parameters.length > 0
-        Lorj.debug(4, "'%s' uses Openstack API filter feature.", __method__)
-        objects = func.call ctrl_query_select(query, String)
-      else
-        objects = func.call
-      end
+      objects = _compat_query(func, __method__, query)
       # Uses :[] or :<key> to match object and query attr.
       Lorj.debug(4, "'%s' gets %d records", __method__, objects.length)
       ctrl_query_each objects, query # Return the select objects.
     end
+  end
+
+  def _compat_query(func, cur_method, query)
+    # Ruby 1.9.2 introduce Method.parameters.
+    if RUBY_VERSION < '1.9.2'
+      Lorj.debug(4, "RUBY '%s': '%s' try Openstack API filter feature.",
+                 RUBY_VERSION, cur_method)
+      begin
+        objects = func.call ctrl_query_select(query, String)
+      rescue
+        Lorj.debug(4, "RUBY '%s': '%s' No filter parameter.",
+                   RUBY_VERSION, cur_method)
+        objects = func.call
+      end
+    else
+      if func.parameters.length > 0
+        Lorj.debug(4, "'%s' uses Openstack API filter feature.", cur_method)
+        objects = func.call ctrl_query_select(query, String)
+      else
+        objects = func.call
+      end
+    end
+    objects
   end
 
   def_query :compute_connection, :tenant
