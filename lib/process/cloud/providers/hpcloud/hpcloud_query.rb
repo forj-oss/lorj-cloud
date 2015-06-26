@@ -16,6 +16,13 @@
 
 # Defined HPCloud object query.
 class HpcloudController
+  # Ensure all data are loaded.
+  def before_trg(o)
+    return unless o.is_a?(Fog::Compute::HPV2::Server)
+
+    o.reload if o.class.method_defined?(:created_at) && o.created_at.nil?
+  end
+
   # Implementation of API NOT supporting query Hash
   # The function will filter itself.
   # It must support
@@ -36,7 +43,8 @@ class HpcloudController
       objects = _compat_query(func, __method__, query)
       # Uses :[] or :<key> to match object and query attr.
       Lorj.debug(4, "'%s' gets %d records", __method__, objects.length)
-      ctrl_query_each objects, query # Return the select objects.
+      # Return the select objects.
+      ctrl_query_each objects, query, :before => method(:before_trg)
     end
   end
 
