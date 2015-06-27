@@ -18,9 +18,10 @@
 class HpcloudController
   # Ensure all data are loaded.
   def before_trg(o)
-    return unless o.is_a?(Fog::Compute::HPV2::Server)
+    return true unless o.is_a?(Fog::Compute::HPV2::Server)
 
     o.reload if o.class.method_defined?(:created_at) && o.created_at.nil?
+    true
   end
 
   # Implementation of API NOT supporting query Hash
