@@ -17,9 +17,12 @@
 # Defined HPCloud object query.
 class HpcloudController
   # Ensure all data are loaded.
-  def before_trg(o)
+  def before_trg(*p)
+    o = p[0]
     return true unless o.is_a?(Fog::Compute::HPV2::Server)
 
+    return true if p[1].is_a?(Hash) &&
+                   (p[1].keys - [:id, :name, 'id', 'name']).empty?
     o.reload if o.class.method_defined?(:created_at) && o.created_at.nil?
     true
   end
