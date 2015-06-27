@@ -106,6 +106,7 @@ class Hpcloud
   attr_value_mapping :active,   'ACTIVE'
   attr_value_mapping :error,    'ERROR'
   attr_value_mapping :shutdown, 'SHUTOFF'
+  attr_value_mapping :deleted,  'DELETED'
 
   # ************************************ SERVER log Object
   define_obj :server_log
