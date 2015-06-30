@@ -17,14 +17,30 @@
 # Defined HPCloud object query.
 class HpcloudController
   # Ensure all data are loaded.
-  def before_trg(*p)
+  def refresh_bef(*p)
     o = p[0]
     return true unless o.is_a?(Fog::Compute::HPV2::Server)
 
-    return true if p[1].is_a?(Hash) &&
-                   (p[1].keys - [:id, :name, 'id', 'name']).empty?
-    o.reload if o.class.method_defined?(:created_at) && o.created_at.nil?
+    query = p[1]
+    return true if query.is_a?(Hash) &&
+                   (query.keys - [:id, :name, 'id', 'name']).empty?
+    if o.class.method_defined?(:created_at) && o.created_at.nil?
+      Lorj.debug(3, '#refresh_bef: Object refreshed')
+      o.reload
+    end
     true
+  end
+
+  def refresh_aft(*p)
+    o = p[0]
+    selected = p[2]
+    return selected unless o.is_a?(Fog::Compute::HPV2::Server)
+
+    if selected && o.class.method_defined?(:created_at) && o.created_at.nil?
+      o.reload
+      Lorj.debug(3, '#refresh_bef: Object refreshed')
+    end
+    selected
   end
 
   # Implementation of API NOT supporting query Hash
@@ -48,7 +64,8 @@ class HpcloudController
       # Uses :[] or :<key> to match object and query attr.
       Lorj.debug(4, "'%s' gets %d records", __method__, objects.length)
       # Return the select objects.
-      ctrl_query_each objects, query, :before => method(:before_trg)
+      ctrl_query_each objects, query, :before => method(:refresh_bef),
+                                      :after => method(:refresh_aft)
     end
   end
 
