@@ -50,11 +50,13 @@
       :desc:              "Service identification for compute"
       :account_exclusive: true
       :account:           true
+      :export:            true
       :step:              :provider_config
     :network:
       :desc:              "Service identification for network"
       :account_exclusive: true
       :account:           true
+      :export:            true
       :step:              :provider_config
 
   # Defines ssh keys credentials
@@ -68,23 +70,27 @@
     :keypair_name:
       :desc:               "keypair name defined in your cloud to access your server."
       :ask_step:           :provider_config
+      :export:             true
     :auth_uri:
       :desc:               "Generic service auth url"
       :ask_step:           :provider_config
       :account_exclusive:  true
       :account:            true
       :required:           true
+      :export:             true
     :user_domain:
       :ask_step:           :provider_config
       :account_exclusive:  true
       :account:            true
       :required:           false
+      :export:             true
     :account_id:
       :desc:               "Generic Cloud Account name."
       :ask_step:           :provider_config
       :account_exclusive:  true
       :account:            true
       :required:           true
+      :export:             true
     :account_key:
       :desc:               "Generic cloud account key"
       :ask_step:           :provider_config
@@ -92,25 +98,30 @@
       :account:            true
       :required:           true
       :encrypted:          true
+      :export:             true
     :tenant:
       :desc:               "Tenant Name (Project name)"
       :ask_step:           :provider_config
       :account_exclusive:  true
       :account:            true
       :required:           true
+      :export:             true
     :prj_domain:
       :ask_step:           :provider_config
       :account_exclusive:  true
       :account:            true
       :required:           false
+      :export:             true
 
   :server:
     :network_name:
       :ask_step:        :cloud_config
       :desc:            "Network name to attach to each forge boxes. By default we use 'forj'. If it doesn't exist, it will be created."
+      :export:             true
     :security_group:
       :desc:            "Security group name to configure and attach to each forge boxes."
       :ask_step:        :cloud_config
+      :export:             true
     :box_name:
       :desc:            "Box name"
     :flavor_name:
@@ -122,6 +133,7 @@
          :object:       :flavor
          :value:        :name
          :validate:     :list_strict
+      :export:             true
     :image_name:
       :desc:            "Image name"
       :ask_step:        :cloud_config
@@ -131,6 +143,7 @@
          :object:       :image
          :value:        :name
          :validate:     :list_strict
+      :export:             true
     :ports:
       :desc:            "List of security group rules (1 port or range of ports) to open to the external network."
       :ask_step:        :cloud_config
