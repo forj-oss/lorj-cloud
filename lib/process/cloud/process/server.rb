@@ -76,7 +76,8 @@ class Lorj::BaseDefinition
              :query_e => :forj_query_server,
              :get_e => :forj_get_server,
              #         :update_e   => :forj_update_server,
-             :delete_e => :forj_delete_server
+             :delete_e => :forj_delete_server,
+             :refresh_e => :controller_refresh
             )
 
   obj_needs :CloudObject,  :compute_connection

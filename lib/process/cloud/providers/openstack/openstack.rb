@@ -26,6 +26,7 @@ load File.join(hpcloud_path, 'openstack_get.rb')
 load File.join(hpcloud_path, 'openstack_delete.rb')
 load File.join(hpcloud_path, 'openstack_create.rb')
 load File.join(hpcloud_path, 'openstack_update.rb')
+load File.join(hpcloud_path, 'openstack_refresh.rb')
 
 # Defines Meta Openstack object
 class Openstack
@@ -260,7 +261,7 @@ class OpenstackController
   def self.def_cruds(*crud_types)
     crud_types.each do |crud_type|
       case crud_type
-      when :create, :delete
+      when :create, :delete, :refresh
         base_method(crud_type)
       when :query, :get
         query_method(crud_type)
@@ -295,10 +296,10 @@ class OpenstackController
   end
 
   def self.base_method(crud_type)
-    define_method(crud_type) do |sObjectType, hParams|
+    define_method(crud_type) do |sObjectType, p1|
       method_name = "#{crud_type}_#{sObjectType}"
       if self.class.method_defined? method_name
-        send(method_name, hParams)
+        send(method_name, p1)
       else
         controller_error "'%s' is not a valid object for '%s'",
                          sObjectType, crud_type
@@ -307,7 +308,7 @@ class OpenstackController
   end
 
   # Define the Openstack controller handlers
-  def_cruds :create, :delete, :get, :query, :update
+  def_cruds :create, :delete, :get, :query, :update, :refresh
 
   def connect(sObjectType, hParams)
     case sObjectType

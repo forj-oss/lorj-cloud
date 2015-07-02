@@ -24,6 +24,7 @@ hpcloud_path = File.expand_path(File.dirname(__FILE__))
 load File.join(hpcloud_path, 'hpcloud_declare.rb')
 load File.join(hpcloud_path, 'hpcloud_generic.rb')
 load File.join(hpcloud_path, 'hpcloud_query.rb')
+load File.join(hpcloud_path, 'hpcloud_refresh.rb')
 
 load File.join(hpcloud_path, 'compute.rb')
 load File.join(hpcloud_path, 'network.rb')
@@ -33,6 +34,60 @@ load File.join(hpcloud_path, 'security_groups.rb')
 # Except Cloud connection, all HPCloud objects management are described/called
 # in HP* modules.
 class HpcloudController # rubocop: disable Metrics/ClassLength
+  # Ready to convert the controller in more maintainable code
+  # Only refresh is currently used.
+  def self.def_cruds(*crud_types)
+    crud_types.each do |crud_type|
+      case crud_type
+      when :create, :delete, :refresh
+        base_method(crud_type)
+      when :query, :get
+        query_method(crud_type)
+      when :update
+        update_method(crud_type)
+      end
+    end
+  end
+  def self.update_method(crud_type)
+    define_method(crud_type) do |sObjectType, obj, hParams|
+      method_name = "#{crud_type}_#{sObjectType}"
+      if self.class.method_defined? method_name
+        send(method_name, obj, hParams)
+      else
+        controller_error "'%s' is not a valid object for '%s'",
+                         sObjectType, crud_type
+      end
+    end
+  end
+
+  def self.query_method(crud_type)
+    define_method(crud_type) do |sObjectType, sCondition, hParams|
+      method_name = "#{crud_type}_#{sObjectType}"
+      if self.class.method_defined? method_name
+        send(method_name, hParams, sCondition)
+      else
+        controller_error "'%s' is not a valid object for '%s'",
+                         sObjectType, crud_type
+      end
+    end
+  end
+
+  def self.base_method(crud_type)
+    define_method(crud_type) do |sObjectType, p1|
+      method_name = "#{crud_type}_#{sObjectType}"
+      if self.class.method_defined? method_name
+        send(method_name, p1)
+      else
+        controller_error "'%s' is not a valid object for '%s'",
+                         sObjectType, crud_type
+      end
+    end
+  end
+
+  # Define the hpcloud controller handlers
+  # def_cruds :create, :delete, :get, :query, :update, :refresh
+  def_cruds :refresh
+
   def connect(sObjectType, hParams)
     case sObjectType
     when :services
