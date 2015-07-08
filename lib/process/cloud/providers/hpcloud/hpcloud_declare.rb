@@ -98,6 +98,12 @@ class Hpcloud
   def_attr_mapping :public_ip_address,
                    [:addresses, '{/.*/}',
                     '<%= data["OS-EXT-IPS:type"] == "floating" %>|addr']
+  def_attr_mapping :priv_ip_addresses,
+                   [:addresses, '{/.*/0}',
+                    '<%= data["OS-EXT-IPS:type"] == "fixed" %>|addr']
+  def_attr_mapping :pub_ip_addresses,
+                   [:addresses, '{/.*/0}',
+                    '<%= data["OS-EXT-IPS:type"] == "floating" %>|addr']
   def_attr_mapping :meta_data, :metadata
 
   def_attr_mapping :status, :state

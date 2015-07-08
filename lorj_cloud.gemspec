@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec", "~> 3.1.0"
 
   spec.add_runtime_dependency "lorj", ">= 1.0.19"
-  spec.add_runtime_dependency 'subhash', '>= 0.1.3'
+  spec.add_runtime_dependency 'subhash', '>= 0.1.5'
   spec.add_runtime_dependency "fog", "~> 1.30.0"
 
   # Ruby 1.8 restrictions - BEGIN - To be removed at next major release.

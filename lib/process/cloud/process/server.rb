@@ -103,8 +103,16 @@ class Lorj::BaseDefinition
   # network_name:
   # - IP addresses
   # The controller must return at least those structured data.
+  # Expect to have Hash with
+  # <network_name> => [<IP>]
   def_attribute :private_ip_addresses
   def_attribute :public_ip_address
+
+  # This was added to keep comptibility with app
+  # Expect to have Hash with:
+  # <network_name> => <IP>
+  def_attribute :priv_ip_addresses
+  def_attribute :pub_ip_addresses
 
   def_attribute :image_id
   def_attribute :key_name
