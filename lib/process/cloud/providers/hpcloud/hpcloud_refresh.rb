@@ -17,7 +17,7 @@
 # Defined Openstack object refresh.
 class HpcloudController
   def self.def_refresh(name)
-    define_method("refresh_#{name}") do |_object_type, object|
+    define_method("refresh_#{name}") do |object|
       if object.class.method_defined?(:reload)
         begin
           object.reload
