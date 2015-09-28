@@ -216,6 +216,7 @@ class Openstack
   attr_value_mapping :error,    'ERROR'
   attr_value_mapping :shutdown, 'SHUTOFF'
   attr_value_mapping :deleted,  'DELETED'
+  attr_value_mapping :rebuild,  'REBUILD'
 
   def_attr_mapping :private_ip_addresses,
                    [:addresses, '{/.*/}',

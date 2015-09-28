@@ -99,6 +99,7 @@ class Lorj::BaseDefinition
   predefine_data_value :error,    :desc => 'Server is in error.'
   predefine_data_value :shutdown, :desc => 'Server is down.'
   predefine_data_value :deleted,  :desc => 'Server is deleted.'
+  predefine_data_value :rebuild,  :desc => 'Server is rebuilding.'
   # The private addresses attribute should be composed by
   # network_name:
   # - IP addresses
