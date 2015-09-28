@@ -79,7 +79,7 @@ class Lorj::BaseDefinition
             #         :delete_e   => :forj_delete_rule
             )
 
-  undefine_attribute :name  # Do not return any predefined name attribute
+  undefine_attribute :name # Do not return any predefined name attribute
 
   obj_needs :CloudObject, :network_connection
   obj_needs :CloudObject, :security_groups, :for => [:create_e]
@@ -87,7 +87,7 @@ class Lorj::BaseDefinition
                                   :extract_from => [:security_groups,
                                                     :attrs, :id]
 
-  obj_needs :data,        :dir,                 :for => [:create_e]
+  obj_needs :data, :dir, :for => [:create_e]
   predefine_data_value :IN,   :desc => 'Input NAT/firewall rule map type'
   predefine_data_value :OUT,  :desc => 'Output NAT/firewall rule map type'
 

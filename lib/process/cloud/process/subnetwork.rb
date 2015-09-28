@@ -58,8 +58,8 @@ class CloudProcess
     begin
       subnet = controller_create(sCloudObj, hParams)
       PrcLib.info("Subnet '%s' created.", subnet[:name])
-   rescue => e
-     PrcLib.fatal(1, "Unable to create '%s' subnet.", name, e)
+    rescue => e
+      PrcLib.fatal(1, "Unable to create '%s' subnet.", name, e)
     end
     subnet
   end
@@ -72,8 +72,8 @@ class CloudProcess
     begin
       provider_delete_subnetwork(net_conn_obj, sub_net_obj)
       net_conn_obj.subnets.get(sub_net_obj.id).destroy
-   rescue => e
-     PrcLib.error("%s\n%s", e.message, e.backtrace.join("\n"))
+    rescue => e
+      PrcLib.error("%s\n%s", e.message, e.backtrace.join("\n"))
     end
   end
 

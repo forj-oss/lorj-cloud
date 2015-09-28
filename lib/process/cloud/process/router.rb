@@ -65,7 +65,7 @@ class Lorj::BaseDefinition
   obj_needs :CloudObject,  :network,             :for => [:create_e]
   obj_needs :CloudObject,  :subnetwork,          :for => [:create_e]
   obj_needs_optional
-  obj_needs :data,         :router_name,         :for => [:create_e]
+  obj_needs :data, :router_name, :for => [:create_e]
 
   def_attribute :gateway_network_id
 end
@@ -73,9 +73,9 @@ end
 # Port Object
 # Identify port attached to network
 class Lorj::BaseDefinition
-  define_obj :port,   :nohandler => true
+  define_obj :port, :nohandler => true
 
-  obj_needs :CloudObject,  :network_connection
+  obj_needs :CloudObject, :network_connection
   def_attribute :device_id
 
   def_attribute :network_id
@@ -88,7 +88,7 @@ end
 # To keep the network model more generic.
 class Lorj::BaseDefinition
   # No process handler defined. Just Controller object
-  define_obj :router_interface,   :nohandler => true
+  define_obj :router_interface, :nohandler => true
 
   obj_needs :CloudObject,  :network_connection
   obj_needs :CloudObject,  :router,              :for => [:create_e]
@@ -132,9 +132,9 @@ class CloudProcess
         PrcLib.info("Router '%s' created without external Network.",
                     router_name)
       end
-   rescue => e
-     PrcLib.error "Unable to create '%s' router\n%s\n%s", router_name,
-                  e.message, e.backtrace.join("\n")
+    rescue => e
+      PrcLib.error "Unable to create '%s' router\n%s\n%s", router_name,
+                   e.message, e.backtrace.join("\n")
     end
     router
   end
@@ -144,9 +144,9 @@ class CloudProcess
     begin
       #################
       provider_delete_router(net_conn_obj, router_obj)
-   # net_conn_obj.routers.get(router.id).destroy
-   rescue => e
-     PrcLib.error("Unable to delete '%s' router ID", router_id, e)
+    # net_conn_obj.routers.get(router.id).destroy
+    rescue => e
+      PrcLib.error("Unable to delete '%s' router ID", router_id, e)
     end
   end
 
@@ -233,8 +233,8 @@ class CloudProcess
     networks = net_conn_obj
     begin
       netty = networks.get(name)
-   rescue => e
-     PrcLib.error("%s\n%s", e.message, e.backtrace.join("\n"))
+    rescue => e
+      PrcLib.error("%s\n%s", e.message, e.backtrace.join("\n"))
     end
     PrcLib.state("Found gateway '%s'", name) if netty
     PrcLib.state("Unable to find gateway '%s'", name) unless netty

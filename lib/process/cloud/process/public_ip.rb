@@ -98,8 +98,8 @@ class CloudProcess
       end
       PrcLib.info("Public IP '%s' for server '%s' "\
                   'assigned.', ip_address[:public_ip], name)
-   rescue => e
-     PrcLib.fatal(1, "Unable to assign a public IP to server '%s'", name, e)
+    rescue => e
+      PrcLib.fatal(1, "Unable to assign a public IP to server '%s'", name, e)
     end
     ip_address
   end

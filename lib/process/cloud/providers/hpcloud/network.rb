@@ -73,11 +73,11 @@ module HPNetwork
     else
       max_value = range_used.max
       new_subnet = max_value.to_i + 1
-      new_cidr  = format('10.0.%s.0/24', new_subnet)
+      new_cidr = format('10.0.%s.0/24', new_subnet)
     end
     new_cidr
- rescue => e
-   Logging.error("%s\n%s", e.message, e.backtrace.join("\n"))
+  rescue => e
+    Logging.error("%s\n%s", e.message, e.backtrace.join("\n"))
   end
 
   # router driver

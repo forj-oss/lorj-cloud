@@ -26,6 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "lorj", ">= 1.0.19"
   spec.add_runtime_dependency 'subhash', '>= 0.1.5'
   spec.add_runtime_dependency "fog", "~> 1.30.0"
+  spec.add_runtime_dependency "net-ssh", "~> 2.9.2"
 
   # Ruby 1.8 restrictions - BEGIN - To be removed at next major release.
   # NOTE that gemspec is used at build time. Do not use RUBY_VERSION check
@@ -37,9 +38,9 @@ Gem::Specification.new do |spec|
     spec.add_development_dependency "ruby-debug"
   elsif RUBY_VERSION.match(/1\.9/)
     spec.add_development_dependency "debugger"
-    spec.add_development_dependency "rubocop", "~> 0.30.0"
+    spec.add_development_dependency "rubocop", "~> 0.34.2"
   else
     spec.add_development_dependency "byebug"
-    spec.add_development_dependency "rubocop", "~> 0.30.0"
+    spec.add_development_dependency "rubocop", "~> 0.34.2"
   end
 end

@@ -56,7 +56,7 @@ class Openstack
                                               :decrypt => true
   obj_needs :data, 'credentials#auth_uri',    :mapping => :openstack_auth_url
   obj_needs :data, 'credentials#tenant',      :mapping => :openstack_tenant
-  obj_needs :data, 'services#compute',     :mapping => :openstack_region
+  obj_needs :data, 'services#compute', :mapping => :openstack_region
 
   obj_needs_optional # Data required if uri contains v3
   obj_needs :data, :user_domain, :mapping => :openstack_user_domain
@@ -68,7 +68,7 @@ class Openstack
                                               :decrypt => true
   obj_needs :data, 'credentials#auth_uri',    :mapping => :openstack_auth_url
   obj_needs :data, 'credentials#tenant',      :mapping => :openstack_tenant
-  obj_needs :data, 'services#network',     :mapping => :openstack_region
+  obj_needs :data, 'services#network', :mapping => :openstack_region
 
   obj_needs_optional # Data required if uri contains v3
   obj_needs :data, :user_domain, :mapping => :openstack_user_domain
@@ -86,7 +86,7 @@ class Openstack
 
   define_obj :keypairs
 
-  undefine_attribute :id    # Do not return any predefined ID
+  undefine_attribute :id # Do not return any predefined ID
 
   define_obj :server_log
 
@@ -98,7 +98,7 @@ class Openstack
   obj_needs :CloudObject, :tenants
 
   define_obj :rule
-  obj_needs :data, :dir,        :mapping => :direction
+  obj_needs :data, :dir, :mapping => :direction
   attr_value_mapping :IN,  'ingress'
   attr_value_mapping :OUT, 'egress'
 
@@ -460,6 +460,7 @@ class OpenstackController
     end
     build_result(version, body)
   end
+
   # Function to provide a wel formatted standard data, usable by openstack
   # provider
   #

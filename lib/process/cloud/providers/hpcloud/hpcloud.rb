@@ -48,6 +48,7 @@ class HpcloudController # rubocop: disable Metrics/ClassLength
       end
     end
   end
+
   def self.update_method(crud_type)
     define_method(crud_type) do |sObjectType, obj, hParams|
       method_name = "#{crud_type}_#{sObjectType}"
@@ -206,6 +207,7 @@ class HpcloudController # rubocop: disable Metrics/ClassLength
                               hParams[:server])
     end
   end
+
   # rubocop: disable CyclomaticComplexity,
   def get(sObjectType, sUniqId, hParams)
     case sObjectType

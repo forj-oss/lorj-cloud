@@ -21,7 +21,7 @@
 # Internet SERVER Object
 # internet server is a server connected to the internet network.
 class Lorj::BaseDefinition
-  define_obj(:internet_server,    :nohandler => true)
+  define_obj(:internet_server, :nohandler => true)
 
   obj_needs :CloudObject,  :internet_network
   obj_needs :CloudObject,  :server

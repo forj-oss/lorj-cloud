@@ -26,8 +26,8 @@
 # is capable to connect to internet
 # And to create this connection if possible.
 class Lorj::BaseDefinition # rubocop: disable ClassAndModuleChildren
-  define_obj(:internet_network,    :nohandler => true)
+  define_obj(:internet_network, :nohandler => true)
 
-  obj_needs :CloudObject,  :external_network # External network to connect if
+  obj_needs :CloudObject, :external_network # External network to connect if
   # needed.
 end

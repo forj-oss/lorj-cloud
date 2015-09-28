@@ -95,5 +95,5 @@ class Lorj::BaseDefinition # rubocop: disable Style/ClassAndModuleChildren
             )
 
   obj_needs :CloudObject,  :compute_connection
-  obj_needs :data,         'server#image_name',          :for => [:create_e]
+  obj_needs :data,         'server#image_name', :for => [:create_e]
 end

@@ -74,7 +74,7 @@ class Lorj::BaseDefinition # rubocop: disable ClassAndModuleChildren
             )
 
   obj_needs :CloudObject, :compute_connection
-  obj_needs :data,        'server#flavor_name',         :for => [:create_e]
+  obj_needs :data,        'server#flavor_name', :for => [:create_e]
   # Cloud provider will need to map to one of those predefined flavors.
   # limitation values may match exactly or at least ensure those limitation
   # are under provider limitation
@@ -82,16 +82,16 @@ class Lorj::BaseDefinition # rubocop: disable ClassAndModuleChildren
   # Cloud provider defines.
   # CloudProcess EHD = 160, then Provider EHD = 200 is ok
   # but Provider EHD = 150 is not ok.
-  predefine_data_value('tiny',    :desc => 'VCU: 1,  RAM:512M, HD:1G,   '\
+  predefine_data_value('tiny', :desc => 'VCU: 1,  RAM:512M, HD:1G,   '\
                                            'EHD: 0G,   Swap: 0G')
-  predefine_data_value('xsmall',  :desc => 'VCU: 1,  RAM:1G,   HD:10G,  '\
+  predefine_data_value('xsmall', :desc => 'VCU: 1,  RAM:1G,   HD:10G,  '\
                                            'EHD: 10G,  Swap: 0G')
-  predefine_data_value('small',   :desc => 'VCU: 2,  RAM:2G,   HD:30G,  '\
+  predefine_data_value('small', :desc => 'VCU: 2,  RAM:2G,   HD:30G,  '\
                                            'EHD: 10G,  Swap: 0G')
-  predefine_data_value('medium',  :desc => 'VCU: 2,  RAM:4G,   HD:30G,  '\
+  predefine_data_value('medium', :desc => 'VCU: 2,  RAM:4G,   HD:30G,  '\
                                            'EHD: 50G,  Swap: 0G')
-  predefine_data_value('large',   :desc => 'VCU: 4,  RAM:8G,   HD:30G,  '\
+  predefine_data_value('large', :desc => 'VCU: 4,  RAM:8G,   HD:30G,  '\
                                            'EHD: 100G, Swap: 0G')
-  predefine_data_value('xlarge',  :desc => 'VCU: 8,  RAM:16G,  HD:30G,  '\
+  predefine_data_value('xlarge', :desc => 'VCU: 8,  RAM:16G,  HD:30G,  '\
                                            'EHD: 200G, Swap: 0G')
 end

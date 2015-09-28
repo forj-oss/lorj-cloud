@@ -28,12 +28,12 @@ class CloudProcess
                  hParams['credentials#tenant'])
     begin
       controller_connect(sCloudObj)
-   rescue => e
-     retry unless ssl_error_obj.error_detected(e.message, e.backtrace, e)
+    rescue => e
+      retry unless ssl_error_obj.error_detected(e.message, e.backtrace, e)
 
-     PrcLib.error('%s:%s: Unable to connect.\n%s',
-                  self.class, sCloudObj, e.message)
-     nil
+      PrcLib.error('%s:%s: Unable to connect.\n%s',
+                   self.class, sCloudObj, e.message)
+      nil
     end
   end
 end

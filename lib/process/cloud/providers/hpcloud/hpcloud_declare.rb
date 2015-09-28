@@ -56,7 +56,7 @@ class Hpcloud
   def_attr_mapping :external, :router_external
 
   define_obj :rule
-  obj_needs :data, :dir,        :mapping => :direction
+  obj_needs :data, :dir, :mapping => :direction
   attr_value_mapping :IN,  'ingress'
   attr_value_mapping :OUT, 'egress'
 
@@ -75,7 +75,7 @@ class Hpcloud
 
   define_obj :keypairs
 
-  undefine_attribute :id    # Do not return any predefined ID
+  undefine_attribute :id # Do not return any predefined ID
 
   # ************************************ Router Object
   define_obj :router
@@ -118,7 +118,7 @@ class Hpcloud
   define_obj :server_log
 
   # Excon::Response object type
-  def_attr_mapping :output,  'output'
+  def_attr_mapping :output, 'output'
 
   # ************************************* Public IP Object
   define_obj :public_ip

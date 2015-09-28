@@ -119,7 +119,7 @@ class Lorj::BaseDefinition
   obj_needs :data,         :keypair_path
   obj_needs :data,         :keypair_base
   # By default optional. But required by the import case if needed.
-  obj_needs :data,         :public_key,          :for => [:create_e]
+  obj_needs :data,         :public_key, :for => [:create_e]
 
   def_attribute :public_key
 end
@@ -333,9 +333,9 @@ class CloudProcess
       begin
         loc_pubkey = File.read(File.join(loc_kpair[:keypair_path],
                                          loc_kpair[:public_key_name]))
-     rescue => e
-       PrcLib.error("Unable to read '%s'.\n%s",
-                    loc_kpair[:public_key_file], e.message)
+      rescue => e
+        PrcLib.error("Unable to read '%s'.\n%s",
+                     loc_kpair[:public_key_file], e.message)
       else
         if loc_pubkey.split(' ')[1].strip == pub_keypair.split(' ')[1].strip
           is_coherent = true

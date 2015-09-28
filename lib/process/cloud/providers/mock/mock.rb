@@ -117,17 +117,17 @@ class MockController
     attributes = oControlerObject
 
     attributes.rh_get(key)
- rescue => e
-   controller_error "Unable to map '%s'.\n%s", key, e.message
+  rescue => e
+    controller_error "Unable to map '%s'.\n%s", key, e.message
   end
 
   def set_attr(oControlerObject, key, value)
     attributes = oControlerObject
 
     attributes.rh_set(value, key)
- rescue => e
-   controller_error "Unable to map '%s' on '%s'.\n%s",
-                    key, sObjectType, e.message
+  rescue => e
+    controller_error "Unable to map '%s' on '%s'.\n%s",
+                     key, sObjectType, e.message
   end
 
   def update(sObjectType, oObject, hParams)

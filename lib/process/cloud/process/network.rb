@@ -46,8 +46,8 @@ class CloudProcess
   # Process Delete handler
   def forj_delete_network(sCloudObj, hParams)
     oProvider.delete(sCloudObj, hParams)
- rescue => e
-   PrcLib.error("%s\n%s", e.message, e.backtrace.join("\n"))
+  rescue => e
+    PrcLib.error("%s\n%s", e.message, e.backtrace.join("\n"))
   end
 
   def forj_get_network(sCloudObj, sID, hParams)
@@ -67,10 +67,10 @@ class Lorj::BaseDefinition
              :delete_e => :forj_delete_network
             )
   obj_needs :CloudObject,  :network_connection
-  obj_needs :data,         :network_name,        :for => [:create_e]
+  obj_needs :data,         :network_name, :for => [:create_e]
 
   obj_needs_optional
-  obj_needs :data,         :subnetwork_name,     :for => [:create_e]
+  obj_needs :data, :subnetwork_name, :for => [:create_e]
 
   # Any attribute are queriable
   def_attribute :external # true if network is external or not.
@@ -87,8 +87,8 @@ class CloudProcess
       PrcLib.state("Creating network '%s'", name)
       network = controller_create(sCloudObj)
       PrcLib.info("Network '%s' created", network[:name])
-   rescue => e
-     PrcLib.fatal(1, "Unable to create network '%s'", name, e)
+    rescue => e
+      PrcLib.fatal(1, "Unable to create network '%s'", name, e)
     end
     network
   end
@@ -101,7 +101,7 @@ class CloudProcess
     query = { :name => hParams[:network_name] }
 
     query_single(sCloudObj, query, hParams[:network_name])
- rescue => e
-   PrcLib.error("%s\n%s", e.message, e.backtrace.join("\n"))
+  rescue => e
+    PrcLib.error("%s\n%s", e.message, e.backtrace.join("\n"))
   end
 end

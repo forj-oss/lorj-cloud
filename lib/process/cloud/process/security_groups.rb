@@ -58,7 +58,7 @@ class CloudProcess
         # Need to set runtime data to get or if missing
         # create the required rule.
         params = {}
-        params[:dir]        = :IN
+        params[:dir] = :IN
         params[:proto] = 'tcp'
         params[:port_min]   = portmin.to_i
         params[:port_max]   = portmax.to_i
@@ -111,7 +111,7 @@ class Lorj::BaseDefinition
             )
 
   obj_needs :CloudObject,  :network_connection
-  obj_needs :data,         :security_group,      :for => [:create_e]
+  obj_needs :data,         :security_group, :for => [:create_e]
   obj_needs_optional
   obj_needs :data,         'server#ports',       :for => [:create_e]
   obj_needs :data,         :sg_desc,             :for => [:create_e]
