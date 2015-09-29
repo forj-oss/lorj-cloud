@@ -114,6 +114,7 @@ class Hpcloud
   attr_value_mapping :shutdown, 'SHUTOFF'
   attr_value_mapping :deleted,  'DELETED'
   attr_value_mapping :rebuild,  'REBUILD'
+  attr_value_mapping :rebuild,  'SUSPENDED'
 
   # ************************************ SERVER log Object
   define_obj :server_log

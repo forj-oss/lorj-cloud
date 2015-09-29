@@ -93,13 +93,14 @@ class Lorj::BaseDefinition
   obj_needs :data,         :meta_data,           :for => [:create_e]
 
   def_attribute :status
-  predefine_data_value :create,   :desc => 'Server is creating.'
-  predefine_data_value :boot,     :desc => 'Server is booting.'
-  predefine_data_value :active,   :desc => 'Server is started.'
-  predefine_data_value :error,    :desc => 'Server is in error.'
-  predefine_data_value :shutdown, :desc => 'Server is down.'
-  predefine_data_value :deleted,  :desc => 'Server is deleted.'
-  predefine_data_value :rebuild,  :desc => 'Server is rebuilding.'
+  predefine_data_value :create,    :desc => 'Server is creating.'
+  predefine_data_value :boot,      :desc => 'Server is booting.'
+  predefine_data_value :active,    :desc => 'Server is started.'
+  predefine_data_value :error,     :desc => 'Server is in error.'
+  predefine_data_value :shutdown,  :desc => 'Server is down.'
+  predefine_data_value :deleted,   :desc => 'Server is deleted.'
+  predefine_data_value :rebuild,   :desc => 'Server is rebuilding.'
+  predefine_data_value :suspended, :desc => 'Server is suspended.'
   # The private addresses attribute should be composed by
   # network_name:
   # - IP addresses
